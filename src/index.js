@@ -17,14 +17,14 @@ import { circuitRelayTransport } from '@libp2p/circuit-relay-v2'
 
 const App = async () => {
   const libp2p = await createLibp2p({
-    // addresses: {
-    //   listen: [
-    //     // 👇 Required to create circuit relay reservations in order to hole punch browser-to-browser WebRTC connections
-    //     '/p2p-circuit',
-    //     // 👇 Listen for webRTC connection
-    //     '/webrtc',
-    //   ],
-    // },
+    addresses: {
+      listen: [
+        // 👇 Required to create circuit relay reservations in order to hole punch browser-to-browser WebRTC connections
+        '/p2p-circuit',
+        // 👇 Listen for webRTC connection
+        '/webrtc',
+      ],
+    },
     transports: [
       webSockets(),
       webTransport(),
@@ -38,35 +38,35 @@ const App = async () => {
       denyDialMultiaddr: async () => false,
     },
     peerDiscovery: [
-      // bootstrap({
-      //   list: [''],
-      // }),
-      // pubsubPeerDiscovery({
-      //   interval: 10_000,
-      //   topics: [PUBSUB_PEER_DISCOVERY],
-      // }),
+      bootstrap({
+        list: ['/ip4/20.103.221.187/tcp/9001/ws/p2p/12D3KooWLKYMt7m6dHz6ihqoJtV1tj4QBL2YQFyWAQrCV5aYgowP'],
+      }),
+      pubsubPeerDiscovery({
+        interval: 10_000,
+        topics: [PUBSUB_PEER_DISCOVERY],
+      }),
     ],
     services: {
-      // pubsub: gossipsub(),
+      pubsub: gossipsub(),
       identify: identify(),
     },
   })
 
 
   // 👇 Dial peers discovered via pubsub
-  // libp2p.addEventListener('peer:discovery', async (evt) => {
-  //   // Encapsulate the multiaddrs with the peer ID to ensure correct dialing
-  //   // Should be fixed when https://github.com/libp2p/js-libp2p/issues/3239 is resolved.
-  //   const maddrs = evt.detail.multiaddrs.map((ma) => ma.encapsulate(`/p2p/${evt.detail.id.toString()}`))
-  //   console.log(
-  //     `Discovered new peer (${evt.detail.id.toString()}). Dialling:`, maddrs.map((ma) => ma.toString()),
-  //   )
-  //   try {
-  //     await libp2p.dial(maddrs) // dial the new peer
-  //   } catch (err) {
-  //     console.error(`Failed to dial peer (${evt.detail.id.toString()}):`, err)
-  //   }
-  // })
+  libp2p.addEventListener('peer:discovery', async (evt) => {
+    // Encapsulate the multiaddrs with the peer ID to ensure correct dialing
+    // Should be fixed when https://github.com/libp2p/js-libp2p/issues/3239 is resolved.
+    const maddrs = evt.detail.multiaddrs.map((ma) => ma.encapsulate(`/p2p/${evt.detail.id.toString()}`))
+    console.log(
+      `Discovered new peer (${evt.detail.id.toString()}). Dialling:`, maddrs.map((ma) => ma.toString()),
+    )
+    try {
+      await libp2p.dial(maddrs) // dial the new peer
+    } catch (err) {
+      console.error(`Failed to dial peer (${evt.detail.id.toString()}):`, err)
+    }
+  })
 
 
   globalThis.libp2p = libp2p

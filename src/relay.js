@@ -7,6 +7,7 @@ import { yamux } from '@chainsafe/libp2p-yamux'
 import { gossipsub } from '@chainsafe/libp2p-gossipsub'
 import { webSockets } from '@libp2p/websockets'
 import { tcp } from '@libp2p/tcp'
+import { webRTC } from '@libp2p/webrtc'
 import { circuitRelayServer } from '@libp2p/circuit-relay-v2'
 import { PUBSUB_PEER_DISCOVERY } from './constants.js'
 
@@ -22,6 +23,7 @@ async function main() {
     transports: [
       webSockets(),
       tcp(),
+      webRTC()
     ],
     connectionEncrypters: [noise()],
     streamMuxers: [yamux()],
